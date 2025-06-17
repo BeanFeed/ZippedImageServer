@@ -80,17 +80,39 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
 
     public async Task DeleteImage(string name, string category)
     {
+        Image? image = await context.Images.FirstOrDefaultAsync(i => i.Name == name && i.CategoryName == category);
+
+        if (image == null)
+        {
+            throw new KeyNotFoundException("Image not found");
+        }
         
+        var filePath = Path.Combine(_executablePath, image.Category.Folder, image.Name);
+
+        if (File.Exists(filePath)) File.Delete(filePath);
+            else throw new FileNotFoundException("Failed to find image file");
+        
+        context.Images.Remove(image);
+        
+        await context.SaveChangesAsync();
     }
     
     public async Task<Category[]> GetCategories()
     {
-        throw new NotImplementedException();
+        return await context.Categories.ToArrayAsync();
     }
     
     public async Task CreateCategory(CreateCategoryModel category)
     {
-        throw new NotImplementedException();
+        category.Folder = category.Folder.Replace("..", ".");
+        Category? existingFolder = await context.Categories.FirstOrDefaultAsync(c => c.Folder == category.Folder);
+        
+        if (existingFolder != null)
+            throw new KeyNotFoundException("Folder already in use");
+        
+        Directory.CreateDirectory(Path.Join(_executablePath, category.Folder));
+        
+        
     }
     
     public async Task DeleteCategory(string category)
