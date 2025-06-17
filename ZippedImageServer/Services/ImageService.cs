@@ -12,9 +12,9 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
 
     private string _executablePath = AppContext.BaseDirectory;
     
-    public async Task<byte[]> DownloadImage(string name, string category, string? apiKey = null)
+    public async Task<FileStream> DownloadImage(string name, string category, string? apiKey = null, bool useApiKey = true)
     {
-        Image? image = await context.Images
+        Image? image = await context.Images.Include(x => x.Category)
             .FirstOrDefaultAsync(i => i.Name == name && i.CategoryName == category);
         
         if (image == null)
@@ -22,8 +22,13 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
             throw new KeyNotFoundException("Image not found");
         }
 
-        if (apiKey != null)
+        if (useApiKey)
         {
+            if (apiKey == null)
+            {
+                throw new UnauthorizedAccessException("Invalid API key");
+            }
+            
             ApiKey[] keys = await context.ApiKeys.Where(i => i.Category.Name == category).ToArrayAsync();
             if (keys.Length == 0)
             {
@@ -51,9 +56,9 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
         
         if (!File.Exists(imagePath)) throw new FileNotFoundException("Failed to find image file");
         
-        var bytes = await File.ReadAllBytesAsync(imagePath);
+        var stream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
 
-        return bytes;
+        return stream;
     }
 
     public async Task<Image> GetImage(string name, string category)
@@ -119,7 +124,7 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
 
     public async Task DeleteImage(string name, string category)
     {
-        Image? image = await context.Images.FirstOrDefaultAsync(i => i.Name == name && i.CategoryName == category);
+        Image? image = await context.Images.Include(x => x.Category).FirstOrDefaultAsync(i => i.Name == name && i.CategoryName == category);
 
         if (image == null)
         {
@@ -158,11 +163,13 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
         };
         
         await context.Categories.AddAsync(newCategory);
+        
+        await context.SaveChangesAsync();
     }
     
     public async Task DeleteCategory(string category)
     {
-        Category? existingCategory = await context.Categories.FirstOrDefaultAsync(c => c.Folder == category);
+        Category? existingCategory = await context.Categories.FirstOrDefaultAsync(c => c.Name == category);
         
         if (existingCategory == null)
             throw new KeyNotFoundException("Category not found");

@@ -1,15 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
+using ZippedImageServer.Services;
 
 namespace ZippedImageServer.Controllers;
 
 [ApiController]
 [Route("~/[controller]")]
-public class ImageController : ControllerBase
+public class ImageController(ImageService imageService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult> Get(string name, string category)
+    [Route("{category}/{name}")]
+    public async Task<ActionResult> Get([FromHeader] string apikey, string name, string category)
     {
-        
-        return Ok();
+        try
+        {
+            FileStream stream = await imageService.DownloadImage(name, category, apikey, true);
+            return File(stream, "application/octet-stream", name);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

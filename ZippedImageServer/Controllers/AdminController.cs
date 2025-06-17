@@ -12,6 +12,21 @@ namespace ZippedImageServer.Controllers;
 public class AdminImageController(ImageService imageService) : ControllerBase
 {
     [HttpGet]
+    [Route("download/{category}/{name}")]
+    public async Task<IActionResult> Download(string category, string name)
+    {
+        try
+        {
+            FileStream stream = await imageService.DownloadImage(name, category, null, false);
+            return File(stream, "application/octet-stream", name);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    [HttpGet]
     [Route("getimages")]
     public async Task<IActionResult> GetImages(string? category)
     {
@@ -25,6 +40,7 @@ public class AdminImageController(ImageService imageService) : ControllerBase
     }
     
     [HttpGet]
+    [Route("{category}/{name}")]
     public async Task<IActionResult> GetImage(string name, string category)
     {
         try
@@ -120,12 +136,27 @@ public class AdminKeyController(KeyService keyService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateKey(CreateKeyModel key)
     {
-        return Ok();
+        try
+        {
+            return Ok(await keyService.CreateKey(key));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [HttpDelete]
     public async Task<IActionResult> DeleteKey(int keyId)
     {
-        return Ok();
+        try
+        {
+            await keyService.DeleteKey(keyId);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

@@ -33,17 +33,17 @@ public class AuthService(ServerContext context, IConfiguration config)
         var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
+            Issuer = config["Auth:Authority"],
             Expires = DateTime.UtcNow.AddDays(1),
             SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
                 new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                    System.Text.Encoding.UTF8.GetBytes(config["Jwt:Key"])),
-                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
+                    System.Text.Encoding.UTF8.GetBytes(config["Auth:KeySecret"])),
+                Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256)
         };
         
-        var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+        var tokenHandler = new JsonWebTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
         
-        return tokenString;
+        return token;
     }
 }
