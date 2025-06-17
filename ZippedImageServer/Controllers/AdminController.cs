@@ -1,80 +1,120 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZippedImageServer.Models;
+using ZippedImageServer.Models.Image;
+using ZippedImageServer.Services;
 
 namespace ZippedImageServer.Controllers;
 
 [ApiController]
 [Authorize(Roles = "Administrator")]
 [Route("~/admin/image")]
-public class AdminImageController : ControllerBase
+public class AdminImageController(ImageService imageService) : ControllerBase
 {
     [HttpGet]
     [Route("getimages")]
     public async Task<IActionResult> GetImages(string? category)
     {
-        return Ok();
+        try
+        {
+            return Ok(await imageService.GetImages(category));
+        } catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
     
     [HttpGet]
     public async Task<IActionResult> GetImage(string name, string category)
     {
-        // Implementation for getting images
-        return Ok();
+        try
+        {
+            return Ok(await imageService.GetImage(name, category));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
     
     [HttpPost]
-    public async Task<IActionResult> UploadImage(IFormFile image)
+    public async Task<IActionResult> UploadImage([FromForm] UploadImageModel model)
     {
-        // Implementation for uploading an image
-        return Ok();
+        try
+        {
+            await imageService.UploadImage(model);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
     
     [HttpDelete]
     public async Task<IActionResult> DeleteImage(string name, string category)
     {
-        // Implementation for deleting an image
-        return Ok();
+        try
+        {
+            await imageService.DeleteImage(name, category);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
 
 [ApiController]
 [Authorize(Roles = "Administrator")]
 [Route("~/admin/categories")]
-public class AdminCategoryController : ControllerBase
+public class AdminCategoryController(ImageService imageService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetCategories()
     {
-        // Implementation for getting categories
-        return Ok();
+        return Ok(await imageService.GetCategories());
     }
     
     [HttpPost]
     public async Task<IActionResult> CreateCategory(CreateCategoryModel category)
     {
-        // Implementation for creating a category
-        return Ok();
+        try
+        {
+            await imageService.CreateCategory(category);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
     
-    [HttpDelete("{category}")]
+    [HttpDelete]
     public async Task<IActionResult> DeleteCategory(string category)
     {
-        // Implementation for deleting a category
-        return Ok();
+        try
+        {
+            await imageService.DeleteCategory(category);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
 
 [ApiController]
 [Authorize(Roles = "Administrator")]
 [Route("~/admin/keys")]
-public class AdminKeyController : ControllerBase
+public class AdminKeyController(KeyService keyService) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetKeys()
     {
-        // Implementation for getting keys
-        return Ok();
+        return Ok(await keyService.GetKeys(null));
     }
 
     [HttpPost]

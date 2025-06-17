@@ -12,17 +12,40 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
 
     private string _executablePath = AppContext.BaseDirectory;
     
-    public async Task<byte[]> DownloadImage(string name, string category)
+    public async Task<byte[]> DownloadImage(string name, string category, string? apiKey = null)
     {
         Image? image = await context.Images
             .FirstOrDefaultAsync(i => i.Name == name && i.CategoryName == category);
-
+        
         if (image == null)
         {
             throw new KeyNotFoundException("Image not found");
         }
-        
-        
+
+        if (apiKey != null)
+        {
+            ApiKey[] keys = await context.ApiKeys.Where(i => i.Category.Name == category).ToArrayAsync();
+            if (keys.Length == 0)
+            {
+                throw new KeyNotFoundException("API key not found for this category");
+            }
+            
+            bool keyExists = false;
+            
+            foreach (var key in keys)
+            {
+                if (BCrypt.Net.BCrypt.Verify(apiKey, key.Key))
+                {
+                    keyExists = true;
+                    break;
+                }
+            }
+            
+            if (!keyExists)
+            {
+                throw new UnauthorizedAccessException("Invalid API key");
+            }
+        }
         
         string imagePath = Path.Combine(_executablePath, image.Category.Folder, image.Name);
         
@@ -45,11 +68,27 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
         return image;
     }
     
-    public async Task<Image[]> GetImages(string category)
+    public async Task<Image[]> GetImages(string? category)
     {
-        return await context.Images
-            .Where(i => i.CategoryName == category)
-            .ToArrayAsync();
+        if (string.IsNullOrEmpty(category))
+        {
+            return await context.Images
+                .Include(i => i.Category)
+                .ToArrayAsync();
+        }
+        else
+        {
+            Category? cat = await context.Categories.FirstOrDefaultAsync(c => c.Name == category);
+            if (cat == null)
+            {
+                throw new KeyNotFoundException("Category not found");
+            }
+            
+            return await context.Images
+                .Where(i => i.CategoryName == category)
+                .Include(i => i.Category)
+                .ToArrayAsync();
+        }
     }
 
     public async Task UploadImage(UploadImageModel image)
@@ -112,12 +151,34 @@ public class ImageService(ServerContext context, KeyService keyService, IHttpCon
         
         Directory.CreateDirectory(Path.Join(_executablePath, category.Folder));
         
+        Category newCategory = new()
+        {
+            Name = category.Name,
+            Folder = category.Folder
+        };
         
+        await context.Categories.AddAsync(newCategory);
     }
     
     public async Task DeleteCategory(string category)
     {
-        throw new NotImplementedException();
+        Category? existingCategory = await context.Categories.FirstOrDefaultAsync(c => c.Folder == category);
+        
+        if (existingCategory == null)
+            throw new KeyNotFoundException("Category not found");
+        
+        Image[] images = await context.Images.Where(i => i.CategoryName == category).ToArrayAsync();
+
+        foreach (var image in images)
+        {
+            await DeleteImage(image.Name, category);
+        }
+        
+        Directory.Delete(Path.Join(_executablePath, existingCategory.Folder));
+        
+        context.Categories.Remove(existingCategory);
+        
+        await context.SaveChangesAsync();
     }
     
 }
