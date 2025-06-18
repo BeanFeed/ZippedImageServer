@@ -4,6 +4,16 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <RepositoryUrl>https://github.com/BeanFeed/ZippedImageServer</RepositoryUrl>
+        <RepositoryType>Github</RepositoryType>
+        <Authors>BeanFeed</Authors>
+        <PackageOutputPath>./nupkg</PackageOutputPath>
+        <Version>1.0.1</Version>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
 </Project>
