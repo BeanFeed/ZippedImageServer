@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{7
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZippedImageApi", "ZippedImageApi\ZippedImageApi.csproj", "{5E8BAD7B-7EC7-4FBF-AE80-D2A5B616E928}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZIClient", "ZIClient\ZIClient.csproj", "{B318A4E8-6A51-47C4-B95C-ED0E9A22AAF3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{5E8BAD7B-7EC7-4FBF-AE80-D2A5B616E928}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E8BAD7B-7EC7-4FBF-AE80-D2A5B616E928}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5E8BAD7B-7EC7-4FBF-AE80-D2A5B616E928}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B318A4E8-6A51-47C4-B95C-ED0E9A22AAF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B318A4E8-6A51-47C4-B95C-ED0E9A22AAF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B318A4E8-6A51-47C4-B95C-ED0E9A22AAF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B318A4E8-6A51-47C4-B95C-ED0E9A22AAF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
