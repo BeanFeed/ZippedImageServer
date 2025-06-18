@@ -12,7 +12,7 @@ public class ApiKey
     public required string Key { get; set; } = null!;
     [JsonIgnore]
     [ForeignKey(nameof(Category))]
-    public required string CategoryName { get; set; } = null!;
+    public string CategoryName { get; set; } = null!;
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; }
     public Category Category { get; set; } = null!;

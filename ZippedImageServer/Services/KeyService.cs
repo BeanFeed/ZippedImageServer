@@ -33,6 +33,7 @@ public class KeyService(ServerContext context)
                 {
                     Id = k.Id,
                     CategoryName = k.CategoryName,
+                    Category = k.Category,
                     Description = k.Description,
                     CreatedAt = k.CreatedAt,
                     Key = "" // Hide the actual key value
@@ -43,6 +44,12 @@ public class KeyService(ServerContext context)
 
     public async Task<string> CreateKey(CreateKeyModel key)
     {
+        Category? category = await context.Categories.FirstOrDefaultAsync(x => x.Name == key.Category);
+        if (category == null)
+        {
+            throw new Exception("Category not found.");
+        }
+        
         var generatedKey = Guid.NewGuid().ToString(); // Generate a new key
         var newKey = new ApiKey
         {
