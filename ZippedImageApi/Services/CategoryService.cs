@@ -21,7 +21,7 @@ public class CategoryService
     {
         try
         {
-            var response = await _client.GetAsync($"{BaseUrls.AdminKey}");
+            var response = await _client.GetAsync($"{BaseUrls.AdminCategory}");
 
             if (!response.IsSuccessStatusCode)
                 throw new Exception("Failed to get Categories.");

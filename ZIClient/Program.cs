@@ -9,12 +9,14 @@ namespace ZIClient;
 
 class Program
 {
-    private static string _executingAssemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-    private static string _tokenFilePath = Path.Join(_executingAssemblyPath, ".authToken");
-    private static string _configFilePath = Path.Join(_executingAssemblyPath, "config.json");
+    private static string appConfigDir = Path.Join(Environment.GetEnvironmentVariable("HOME"), ".config", "ZIClient");
+    private static string _tokenFilePath = Path.Join(appConfigDir, ".authToken");
+    private static string _configFilePath = Path.Join(appConfigDir, "config.json");
     
     static async Task<int> Main(string[] args)
     {
+        if(!Directory.Exists(appConfigDir)) Directory.CreateDirectory(appConfigDir);
+        
         if(!File.Exists(_tokenFilePath)) File.Create(_tokenFilePath).Close();
         var token = await File.ReadAllTextAsync(_tokenFilePath);
         
@@ -380,6 +382,7 @@ class Program
                     Console.WriteLine($"{key.Id.ToString().ToFixedString(10)} {key.Category.Name.ToFixedString(20)} {(key.Description ?? "").ToFixedString(40)}");
                     
                     isOdd = !isOdd;
+                    Console.BackgroundColor = defaultBackgroundColor;
                 }
                 Console.BackgroundColor = defaultBackgroundColor;
                 Console.WriteLine("");
@@ -420,6 +423,7 @@ class Program
                     Console.WriteLine($"{category.Name.ToFixedString(20)} {category.Folder.ToFixedString(40)}");
 
                     isOdd = !isOdd;
+                    Console.BackgroundColor = defaultBackgroundColor;
                 }
 
                 Console.BackgroundColor = defaultBackgroundColor;
@@ -451,7 +455,7 @@ class Program
             IsRequired = false
         };
 
-        var getImageCommand = new Command("images", "Get images");
+        var getImageCommand = new Command("image", "Get images");
         
         getImageCommand.AddOption(getImageCategoryOption);
         getImageCommand.AddOption(getImageNameOption);
@@ -519,6 +523,7 @@ class Program
                     Console.WriteLine($"{image.Name.ToFixedString(20)} {image.Category.Name.ToFixedString(20)}");
 
                     isOdd = !isOdd;
+                    Console.BackgroundColor = defaultBackgroundColor;
                 }
 
                 Console.BackgroundColor = defaultBackgroundColor;
